@@ -24,18 +24,24 @@ def main():
     for i in range(int(m)):
         st.subheader(f"Wypłata nr {i+1}")
         ck = st.number_input(f"Kwota wypłaty nr {i+1}:", key=f"ck_{i}")
-        tk = st.number_input(f"Czas wypłaty nr {i+1} (w latach):", key=f"tk_{i}", format="%.6f")
+        tk = st.number_input(f"Czas wypłaty nr {i+1} (w latach, np. 0 dla wypłaty dzisiaj):", key=f"tk_{i}", format="%.6f")
         wyplaty.append((ck, tk))
 
-    st.header("Dane o spłatach/opłatach")
-    m_prim = st.number_input("Podaj liczbę spłat/opłat:", min_value=1, step=1)
+    st.header("Dane o ratach")
+
+    rata_stala = st.number_input("Podaj wysokość stałej raty (zł):", min_value=0.0, step=0.01, format="%.2f")
+    liczba_rat_stalych = st.number_input("Podaj liczbę stałych rat:", min_value=0, step=1)
+    rata_ostatnia = st.number_input("Podaj wysokość ostatniej raty (wyrównawczej):", min_value=0.0, step=0.01, format="%.2f")
 
     splaty = []
-    for i in range(int(m_prim)):
-        st.subheader(f"Spłata/Opłata nr {i+1}")
-        dl = st.number_input(f"Kwota spłaty/opłaty nr {i+1}:", key=f"dl_{i}")
-        sl = st.number_input(f"Czas spłaty/opłaty nr {i+1} (w latach):", key=f"sl_{i}", format="%.6f")
-        splaty.append((dl, sl))
+    # Dodajemy stałe raty co miesiąc
+    for i in range(int(liczba_rat_stalych)):
+        czas = (i + 1) / 12  # pierwszy miesiąc = 1/12 roku, potem 2/12 itd.
+        splaty.append((rata_stala, czas))
+
+    # Dodajemy ostatnią ratę
+    czas_ostatniej_raty = (liczba_rat_stalych + 1) / 12  # kolejny miesiąc po stałych ratach
+    splaty.append((rata_ostatnia, czas_ostatniej_raty))
 
     if st.button("Oblicz RRSO"):
         rrso = oblicz_rrso(wyplaty, splaty)
